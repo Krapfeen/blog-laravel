@@ -1,4 +1,3 @@
-.docker/
 .editorconfig
 .env.example
 .gitattributes

@@ -9,6 +9,18 @@ services:
         volumes:
           - ./:/var/www/html
 
+    node:
+        image: node:24-alpine
+        container_name: ${APP_NAME}-node
+        working_dir: /var/www/html
+        ports:
+            - "5173:5173"
+        volumes:
+            - ./:/var/www/html
+        command: sh -c "yarn install && yarn run dev"
+        depends_on:
+            - app
+
     web:
         image: nginx:alpine
         container_name: ${APP_NAME}-nginx
