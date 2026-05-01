@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+    name: Test on PHP 8.4
+    container:
+      image: php:8.4-cli
+      options: --user root
+      env:
+        APP_ENV: testing
+        DB_CONNECTION: sqlite
+        DB_DATABASE: ":memory:"
+        CACHE_STORE: array
+        SESSION_DRIVER: array
+        QUEUE_CONNECTION: sync
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            git unzip libzip-dev libsqlite3-dev curl
+          docker-php-ext-install pdo_sqlite zip
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+          php -r "unlink('composer-setup.php');"
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+          npm install -g yarn
+          yarn install
+          yarn build
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run tests
+        run: php artisan test
