@@ -1,0 +1,8 @@
+.docker/
+.editorconfig
+.env.example
+.gitattributes
+.dockerignore
+compose.yml
+Dockerfile
+README.md
